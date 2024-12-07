@@ -43,7 +43,6 @@ div
     :header-class="sidebarBg"
   )
     link-to-select(v-model="linkTo")
-    batch-size-select(v-model="batchSize")
     image-size-input(v-model="height")
     muted-keywords-input(v-model="mutedKeywords")
     auto-pause-input(v-model="maxPictures")
@@ -53,8 +52,8 @@ div
 </template>
 
 <script setup lang="ts">
-import type { CommitCreateEvent } from "@skyware/jetstream";
-import { PostLinkOptions, type ImageItem } from "~/types/post";
+import { PostLinkOptions } from "~/types/post";
+import { useBluesky } from "./composables/useBluesky";
 
 useSeoMeta({
   title: "Imgsky",
@@ -62,15 +61,10 @@ useSeoMeta({
   keywords: "bluesky,images,live",
 });
 
-const batchSize = ref(40);
-
-const { data, open, close } = useWebSocket(
-  "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post"
-);
+const { open, close, imageItems, clearTempStorage } = useBluesky();
 
 const mutedKeywords = useLocalStorage("mutedKeywords", []);
 
-const imageItems = ref<ImageItem[]>([]);
 const filterStr = ref("");
 const filteredImageItems = computed(() => {
   const trimmedVal = filterStr.value.trim();
@@ -89,28 +83,6 @@ const filteredImageItems = computed(() => {
 
     return containsFilterText && !containsMutedKeyword;
   });
-});
-
-let tempStorage: ImageItem[] = [];
-
-watch(data, (val) => {
-  const parsed = JSON.parse(val) as CommitCreateEvent<"app.bsky.feed.post">;
-
-  if (parsed?.commit?.record?.embed?.$type === "app.bsky.embed.images") {
-    const toInsert = parsed.commit.record.embed.images.map((image) => ({
-      did: parsed.did,
-      imageLink: image.image.ref.$link,
-      commitRkey: parsed.commit.rkey,
-      text: parsed.commit.record.text,
-    }));
-
-    tempStorage.push(...toInsert);
-  }
-
-  if (tempStorage.length > batchSize.value) {
-    imageItems.value.push(...tempStorage);
-    tempStorage = [];
-  }
 });
 
 const paused = ref(false);
@@ -164,7 +136,7 @@ function handleMouseLeave() {
 
 function clearAll() {
   imageItems.value = [];
-  tempStorage = [];
+  clearTempStorage();
 }
 
 const linkTo = useLocalStorage("linkTo", PostLinkOptions.Image);
