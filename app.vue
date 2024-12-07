@@ -45,6 +45,7 @@ div
     link-to-select(v-model="linkTo")
     batch-size-select(v-model="batchSize")
     image-size-input(v-model="height")
+    muted-keywords-input(v-model="mutedKeywords")
     auto-pause-input(v-model="maxPictures")
     b-alert.p-2(variant="info", :model-value="true") #[icon(name="tabler:info-circle")] Settings are saved to your browser's localStorage
   .post-tooltip.position-absolute.z-2(v-if="content", :style="tooltipStyle") {{ content }}
@@ -67,16 +68,27 @@ const { data, open, close } = useWebSocket(
   "wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post"
 );
 
+const mutedKeywords = useLocalStorage("mutedKeywords", []);
+
 const imageItems = ref<ImageItem[]>([]);
 const filterStr = ref("");
 const filteredImageItems = computed(() => {
   const trimmedVal = filterStr.value.trim();
+  const hasTrimmedVal = trimmedVal !== "";
+  const hasMutedKeywords = mutedKeywords.value.length > 0;
 
-  if (trimmedVal === "") {
+  if (!hasTrimmedVal && !hasMutedKeywords) {
     return imageItems.value;
-  } else {
-    return imageItems.value.filter((d) => d.text.includes(trimmedVal));
   }
+
+  return imageItems.value.filter((d) => {
+    const containsFilterText = !hasTrimmedVal || d.text.includes(trimmedVal);
+    const containsMutedKeyword = mutedKeywords.value.some((muted) =>
+      d.text.includes(muted)
+    );
+
+    return containsFilterText && !containsMutedKeyword;
+  });
 });
 
 let tempStorage: ImageItem[] = [];
