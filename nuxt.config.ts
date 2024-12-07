@@ -22,6 +22,7 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@nuxt/icon",
     "@nuxt/fonts",
+    "nuxt-umami",
   ],
 
   colorMode: {
@@ -65,4 +66,8 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: "2024-11-18",
+
+  umami: {
+    ignoreLocalhost: true,
+  },
 });
