@@ -54,6 +54,7 @@ div
 <script setup lang="ts">
 import { PostLinkOptions } from "~/types/post";
 import { useBluesky } from "./composables/useBluesky";
+import { useString } from "./composables/useString";
 
 useSeoMeta({
   title: "Imgsky",
@@ -64,6 +65,8 @@ useSeoMeta({
 const { open, close, imageItems, clearTempStorage } = useBluesky();
 
 const mutedKeywords = useLocalStorage("mutedKeywords", []);
+
+const { isStringInWord } = useString();
 
 const filterStr = ref("");
 const filteredImageItems = computed(() => {
@@ -76,9 +79,10 @@ const filteredImageItems = computed(() => {
   }
 
   return imageItems.value.filter((d) => {
-    const containsFilterText = !hasTrimmedVal || d.text.includes(trimmedVal);
+    const containsFilterText =
+      !hasTrimmedVal || isStringInWord(trimmedVal, d.text);
     const containsMutedKeyword = mutedKeywords.value.some((muted) =>
-      d.text.includes(muted)
+      isStringInWord(muted, d.text)
     );
 
     return containsFilterText && !containsMutedKeyword;
