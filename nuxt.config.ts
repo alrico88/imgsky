@@ -22,7 +22,9 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@nuxt/icon",
     "@nuxt/fonts",
+    "@nuxt/image",
     "nuxt-umami",
+    "@morev/vue-transitions/nuxt",
   ],
 
   colorMode: {

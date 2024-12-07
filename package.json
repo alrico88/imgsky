@@ -33,6 +33,8 @@
     "workbox-window": "^7.1.0"
   },
   "dependencies": {
+    "@morev/vue-transitions": "^3.0.5",
+    "@nuxt/image": "^1.8.1",
     "@vueuse/core": "^12.0.0",
     "@vueuse/nuxt": "^12.0.0",
     "bootstrap": "5.3.3",

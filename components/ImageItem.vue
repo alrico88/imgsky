@@ -1,11 +1,13 @@
 <template lang="pug">
-nuxt-link.grid-item(
-  :to="url",
-  target="_blank",
-  @mousemove="handleMouseOver",
-  @mouseleave="handleMouseLeave"
-)
-  img.flex-grow(:src="thumbSrc")
+transition-fade
+  nuxt-link.grid-item(
+    v-show="imageLoaded",
+    :to="url",
+    target="_blank",
+    @mousemove="handleMouseOver",
+    @mouseleave="handleMouseLeave"
+  )
+    nuxt-img.flex-grow(:src="thumbSrc", @load="imageLoaded = true")
 </template>
 
 <script setup lang="ts">
@@ -23,6 +25,8 @@ const emit = defineEmits<{
   (e: "item-hover", val: { x: number; y: number; text: string }): void;
   (e: "item-stop"): void;
 }>();
+
+const imageLoaded = ref(false);
 
 const url = computed(() =>
   props.linkTo === PostLinkOptions.Post
